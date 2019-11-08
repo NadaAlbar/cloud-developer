@@ -37,7 +37,7 @@ provider:
     AUTH_0_SECRET_FIELD: auth0Secret
 
   iamRoleStatements:
-    - Effect: Allow
+    - Effect: Allow #to use canary deployment
       Action:
         - codedeploy:*
       Resource:

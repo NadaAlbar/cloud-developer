@@ -166,7 +166,6 @@ functions:
   #     - stream:
   #         type: dynamodb
   #         arn: !GetAtt ImagesDynamoDBTable.StreamArn
-
 resources:
   Resources:
     GroupsDynamoDBTable:

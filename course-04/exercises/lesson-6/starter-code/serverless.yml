@@ -84,15 +84,16 @@ provider:
 custom:
   topicName: imagesTopic-${self:provider.stage}
 
-  serverless-offline:
+  serverless-offline: #Run api gateway on port 3003
     port: 3003
 
   dynamodb:
     start:
       port: 8000
-      inMemory: true
-      migrate: true
-
+      inMemory: true #Store data in memory
+      migrate: true #Create table according to the definitions provided in in serverless.yaml 
+    stages:
+      - dev
   documentation:
     api:
       info:

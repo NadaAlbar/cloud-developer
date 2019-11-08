@@ -56,7 +56,7 @@ export class CreateImage extends React.PureComponent<
       }
 
       this.setUploadState(UploadState.UploadingData)
-      const uploadInfo = await createImage({
+      const uploadInfo = await createImage({ //upload image metadata.
         groupId: this.props.match.params.groupId,
         title: this.state.title
       })

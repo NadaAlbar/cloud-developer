@@ -7,11 +7,12 @@
     "test": "jest"
   },
   "dependencies": {
-    "aws-xray-sdk": "^2.2.0",
     "aws-serverless-express": "^3.3.6",
+    "aws-xray-sdk": "^2.2.0",
     "elasticsearch": "^15.4.1",
     "express": "^4.16.4",
     "http-aws-es": "^6.0.0",
+    "increase-memory-limit": "^1.0.7",
     "jimp": "^0.6.1",
     "jsonwebtoken": "^8.5.1",
     "middy": "^0.25.0",
@@ -24,7 +25,7 @@
     "@types/jest": "^24.0.11",
     "@types/jsonwebtoken": "^8.3.2",
     "@types/node": "^10.14.4",
-    "aws-sdk": "^2.433.0",
+    "aws-sdk": "^2.559.0",
     "jest": "^24.7.1",
     "serverless-aws-documentation": "^1.1.0",
     "serverless-dynamodb-local": "^0.2.37",

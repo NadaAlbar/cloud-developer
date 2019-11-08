@@ -13,7 +13,7 @@ export const handler = middy(async (event: CustomAuthorizerEvent, context): Prom
   try {
     const decodedToken = verifyToken(
       event.authorizationToken,
-      context.AUTH0_SECRET[secretField]
+      context.AUTH0_SECRET[secretField]//to read the secretField 
     )
     console.log('User was authorized', decodedToken)
 
@@ -62,11 +62,11 @@ function verifyToken(authHeader: string, secret: string): JwtToken {
   return verify(token, secret) as JwtToken
 }
 
-handler.use(
+handler.use( //to download secret
   secretsManager({
-    awsSdkOptions: { region: 'us-east-1' },
+    awsSdkOptions: { region: 'us-east-2' }, //******** */
     cache: true,
-    cacheExpiryInMillis: 60000,
+    cacheExpiryInMillis: 60000,//cache results for one minute.
     // Throw an error if can't read the secret
     throwOnFailedCall: true,
     secrets: {
