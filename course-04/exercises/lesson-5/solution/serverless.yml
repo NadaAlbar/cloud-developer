@@ -193,7 +193,7 @@ resources:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
           gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'" #########PATCH ?
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: ApiGatewayRestApi
@@ -218,7 +218,7 @@ resources:
             AttributeType: S
           - AttributeName: timestamp
             AttributeType: S
-          - AttributeName: imageId
+          - AttributeName: imageId 
             AttributeType: S
         KeySchema:
           - AttributeName: groupId

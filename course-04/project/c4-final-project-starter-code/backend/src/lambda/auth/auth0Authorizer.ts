@@ -1,12 +1,17 @@
 import { CustomAuthorizerEvent, CustomAuthorizerResult } from 'aws-lambda'
 import 'source-map-support/register'
 
-import { verify, decode } from 'jsonwebtoken'
+import { verify , decode } from 'jsonwebtoken'
 import { createLogger } from '../../utils/logger'
-import Axios from 'axios'
-import { Jwt } from '../../auth/Jwt'
 import { JwtPayload } from '../../auth/JwtPayload'
-import { getUserId } from '../utils'
+import { Jwt } from '../../auth/Jwt'
+import {parseUserId} from '../../auth/utils'
+import * as AWS from 'aws-sdk'
+/*
+import Axios from 'axios'*/
+
+//import { getUserId } from '../utils'
+
 
 const logger = createLogger('auth')
 
@@ -36,14 +41,31 @@ uuJb9fOq88Y32C45NbyYch2tgGMYvsCLVwaEtiXbKGwVNDbSt98NdWscu1SXdlv2
 af0DUmIcFmni2jw=
 -----END CERTIFICATE-----
 `
-export const handler = async (
-  event: CustomAuthorizerEvent
-): Promise<CustomAuthorizerResult> => {
+
+const docClient = new AWS.DynamoDB.DocumentClient()
+const UsersTable = process.env.USERS_TABLE
+
+
+export const handler = async (event: CustomAuthorizerEvent): Promise<CustomAuthorizerResult> => {
   logger.info('Authorizing a user', event.authorizationToken)
+
   try {
     const jwtToken = await verifyToken(event.authorizationToken)
     logger.info('User was authorized', jwtToken)
+    //add user to dynamodb table
+    const userId =jwtToken.sub
 
+    const newUser={
+      id: userId,
+      lastsignin: new Date().toISOString()
+    }
+
+    await docClient.put({
+      TableName: UsersTable,
+      Item: newUser
+    }).promise()
+    
+    console.log('User was added to DB, ',userId )
     return {
       principalId: jwtToken.sub,
       policyDocument: {
@@ -78,8 +100,12 @@ export const handler = async (
 
 async function verifyToken(authHeader: string): Promise<JwtPayload> {
   const token = getToken(authHeader)
-  //const jwt: Jwt = decode(token, { complete: true }) as Jwt //It does not validate a JWT token, but just parses it and returns its payload
+  const jwt: Jwt = decode(token, { complete: true }) as Jwt //It does not validate a JWT token, but just parses it and returns its payload
   
+  console.log(jwt)
+  console.log('getUserId',parseUserId(token))
+  
+
   // TODO: Implement token verification
   // You should implement it similarly to how it was implemented for the exercise for the lesson 5
   // You can read more about how to do this here: https://auth0.com/blog/navigating-rs256-and-jwks/
@@ -87,8 +113,8 @@ async function verifyToken(authHeader: string): Promise<JwtPayload> {
 }
 
 function getToken(authHeader: string): string {
-  if (!authHeader) throw new Error('No authentication header')
-
+  if (!authHeader)
+    throw new Error('No authentication header')
   if (!authHeader.toLowerCase().startsWith('bearer '))
     throw new Error('Invalid authentication header')
 
