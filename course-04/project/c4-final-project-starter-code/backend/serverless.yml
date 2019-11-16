@@ -16,7 +16,7 @@ provider:
 
   environment:
     USERS_TABLE: Users-${self:provider.stage}
-    TODO_TABLE: Todo-${self:provider.stage}
+    TODO_TABLE: Todos-${self:provider.stage}
     TODO_ID_INDEX: TodoIdIndex
     IMAGES_S3_BUCKET: todo-attachments-nb${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
@@ -153,34 +153,60 @@ resources:
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.USERS_TABLE}
 
-    ToDoDynamoDBTable: 
+
+    ToDosDynamoDBTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
-          - AttributeName: createdAt 
-            AttributeType: S
+          # - AttributeName: createdAt
+          #   AttributeType: S
           - AttributeName: todoId
             AttributeType: S
         KeySchema:
-          - AttributeName: userId 
+          - AttributeName: userId
             KeyType: HASH
-          - AttributeName: createdAt 
+          - AttributeName: todoId
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.TODO_TABLE}
-        LocalSecondaryIndexes: #list of indexes we want to add to our table
+        GlobalSecondaryIndexes:
           - IndexName: ${self:provider.environment.TODO_ID_INDEX}
             KeySchema:
-              - AttributeName: userId
-                KeyType: HASH
-              - AttributeName: todoId
-                KeyType: RANGE
-            # - AttributeName: todoId # this index will hsve only the partition key "hashed" for this index table, and it will be an index for the attribute image id. 
-            #   KeyType: HASH
+            - AttributeName: todoId
+              KeyType: HASH
             Projection:
-              ProjectionType: ALL #copy all attributes from the original table
+              ProjectionType: ALL
+
+    # ToDoDynamoDBTable: 
+    #   Type: "AWS::DynamoDB::Table"
+    #   Properties:
+    #     AttributeDefinitions:
+    #       - AttributeName: userId
+    #         AttributeType: S
+    #       - AttributeName: createdAt 
+    #         AttributeType: S
+    #       - AttributeName: todoId
+    #         AttributeType: S
+    #     KeySchema:
+    #       - AttributeName: userId 
+    #         KeyType: HASH
+    #       - AttributeName: createdAt 
+    #         KeyType: RANGE
+    #     BillingMode: PAY_PER_REQUEST
+    #     TableName: ${self:provider.environment.TODO_TABLE}
+    #     LocalSecondaryIndexes: #list of indexes we want to add to our table
+    #       - IndexName: ${self:provider.environment.TODO_ID_INDEX}
+    #         KeySchema:
+    #           - AttributeName: todoId #userId
+    #             KeyType: HASH
+    #           # - AttributeName: todoId
+    #           #   KeyType: RANGE
+    #         # - AttributeName: todoId # this index will hsve only the partition key "hashed" for this index table, and it will be an index for the attribute image id. 
+    #         #   KeyType: HASH
+    #         Projection:
+    #           ProjectionType: ALL #copy all attributes from the original table
        
 
 
