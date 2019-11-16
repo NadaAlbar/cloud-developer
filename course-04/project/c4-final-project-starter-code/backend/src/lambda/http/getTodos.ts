@@ -58,6 +58,7 @@ async function userExists(userId: string){
 async function getTodosforUserId(userId: string){
   const result = await docClient.query({
     TableName: ToDoTable,
+    //IndexName: todoIdIndex,
     KeyConditionExpression: 'userId = :userId',
     ExpressionAttributeValues:{
       ':userId': userId

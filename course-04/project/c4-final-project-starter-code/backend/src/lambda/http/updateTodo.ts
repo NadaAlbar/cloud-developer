@@ -4,19 +4,21 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
 import * as middy from 'middy'
 import { cors } from 'middy/middlewares'
+import {getUserId} from '../utils'
+
 
 const todoTable= process.env.TODO_TABLE
 //const todoIdIndex = process.env.TODO_ID_INDEX
 const docClient = new AWS.DynamoDB.DocumentClient()
 
 export const handler= middy ( async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    const todoId = event.pathParameters.todoId
-    console.log('Update todo: id: ',todoId)
+    const todoIdp = event.pathParameters.todoId
+    console.log('Update todoIdp ',todoIdp)
     const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
-  
+    console.log('updatedTodo, ', updatedTodo)
     // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
-    const todoIdValidation = await todoExists(todoId)
-
+   // const todoIdValidation = await todoExists(todoId)
+/*
     if(!todoIdValidation){
       return {
         statusCode:404,
@@ -36,21 +38,43 @@ export const handler= middy ( async (event: APIGatewayProxyEvent): Promise<APIGa
       
     }
 */    
-    docClient.update({
-      TableName: todoTable,
+
+    // const result = await docClient.update({
+    //   TableName: todoTable,
+    //   //IndexName : todoIdIndex
+    //   Key: {
+    //    id: todoId
+    //   },
+    //   /////////
+    //   UpdateExpression: "set name= :name, dueDate= :dueDate, done= :done",
+    //   ExpressionAttributeValues: {
+    //     ":name": updatedTodo.name,
+    //     ":dueDate": updatedTodo.dueDate,
+    //     ":done":updatedTodo.done
+    // } }).promise()
+    // console.log('update result: ', result)
+
+    console.log('getUserId(event)', getUserId(event))
+    await docClient.update({
+      TableName: todoTable,  //****** 
       Key: {
-        id: todoId,
-       TODO_ID_INDEX : todoIdIndex,
+        todoId: todoIdp,
+        userId: getUserId(event)
+        
       },
-      /////////
-      UpdateExpression: "set name= :name, dueDate= :dueDate, done= :done",
+      UpdateExpression: 'set #name = :name, #dueDate = :duedate, #done = :d', /*** */
       ExpressionAttributeValues: {
-        ":name": updatedTodo.name,
-        ":dueDate": updatedTodo.dueDate,
-        ":done":updatedTodo.done
+          ':name': updatedTodo.name,
+          ':duedate': updatedTodo.dueDate,
+          ':d': updatedTodo.done
+      },
+      ExpressionAttributeNames: {
+        '#name': 'name',
+        '#dueDate': 'dueDate',
+        '#done': 'done'
     }
-      })
-  
+    }).promise()
+
     return {
       statusCode: 204,
       headers: {
@@ -68,15 +92,15 @@ handler.use(
     credential:true
   })
 )
-
-async function todoExists(todoId: string){
+/*
+async function todoExists(todoIdparam: string){
     const result = await docClient.get({
       TableName: todoTable,
       Key: {
-        id: todoId
+        todoId: todoIdparam
       }
     }).promise()
     console.log(' Get Todo, ',result)
 
     return !!result.Item
-}
+}*/
