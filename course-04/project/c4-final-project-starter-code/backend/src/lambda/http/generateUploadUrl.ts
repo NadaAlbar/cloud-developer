@@ -6,13 +6,13 @@ import { cors } from 'middy/middlewares'
 import * as uuid from 'uuid'
 import {getUserId} from '../utils'
 
-//const docClient = new AWS.DynamoDB.DocumentClient()
+const docClient = new AWS.DynamoDB.DocumentClient()
 const s3 = new AWS.S3({
   signatureVersion: 'v4'
 })
 
 //const UsersTable = process.env.USERS_TABLE
-//const TodoTable = process.env.TODO_TABLE
+const TodoTable = process.env.TODO_TABLE
 const bucketName = process.env.IMAGES_S3_BUCKET
 const urlExpiration = process.env.SIGNED_URL_EXPIRATION
 
@@ -34,6 +34,8 @@ export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGat
     }
   }*/
 
+  
+
   const imageId = uuid.v4()
   const newImage =  await createImage (imageId)//this will be saved to the DB
   
@@ -42,6 +44,22 @@ export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGat
 
   const signedurl = getUploadUrl(imageId)
 
+  await docClient.update({
+    TableName: TodoTable,  //****** 
+    Key: {
+      todoId: todoIdparam,
+      userId: getUserId(event)
+      
+    },
+    UpdateExpression: 'set #attachmentUrl = :attachmentUrl', /*** */
+    ExpressionAttributeValues: {
+        ':attachmentUrl': newImage
+        
+    },
+    ExpressionAttributeNames: {
+      '#attachmentUrl': 'attachmentUrl'
+  }
+  }).promise()
   
     return {
     statusCode: 201,
@@ -83,6 +101,7 @@ async function createImage(imageId: string){
   const imageUrl= `https://${bucketName}.s3.amazonaws.com/${imageId}`
   //put in db......
   return imageUrl
+
 }
 
 
