@@ -3,13 +3,16 @@ service:
 
 plugins:
   - serverless-webpack
-  - serverless-iam-roles-per-function
   - serverless-reqvalidator-plugin # to enable the validator
   - serverless-aws-documentation # to enable the validator
+  - serverless-iam-roles-per-function
 
 provider:
   name: aws
   runtime: nodejs8.10
+  tracing:
+    lambda: true
+    apiGateway: true
 
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-2'}
@@ -22,29 +25,34 @@ provider:
     SIGNED_URL_EXPIRATION: 300
   
 
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:PutItem
-        - dynamodb:GetItem
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}
-    - Effect: Allow
-      Action:
-        - dynamodb:PutItem
-        - dynamodb:Query
-        - dynamodb:GetItem #to get a single todo item by id
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}/index/${self:provider.environment.TODO_ID_INDEX}
-    - Effect: Allow
-      Action:
-        - s3:PutObject
-        - s3:GetObject
-      Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
+
+  #   - Effect: Allow
+  #     Action:
+  #       - dynamodb:PutItem
+  #       - dynamodb:GetItem
+  #     Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}
+  # iamRoleStatements:
+  #    - Effect: Allow
+  #      Action:
+  #        - "xray:PutTraceSegments"
+  #        - "xray:PutTelemetryRecords"
+  #      Resource: "*"
+    #   Action:
+    #    # - dynamodb:PutItem  ##generateUrl, createTodo
+    #     - dynamodb:Query
+    #     - dynamodb:GetItem #Update, delete
+    #    # - dynamodb:UpdateItem 
+    #    # - dynamodb:DeleteItem
+    #   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
+    # # - Effect: Allow
+    # #   Action:
+    # #     - dynamodb:Query
+    # #   Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}/index/${self:provider.environment.TODO_ID_INDEX}
+    # - Effect: Allow
+    #   Action:
+    #     - s3:PutObject
+    #     - s3:GetObject
+    #   Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
 
 custom:
   documentation:
@@ -69,7 +77,17 @@ functions:
 
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
-   # cors: true
+    iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}
+    - Effect: Allow
+      Action:
+        - "xray:PutTraceSegments"
+        - "xray:PutTelemetryRecords"
+      Resource: "*"
+    cors: true
 
   # TODO: Configure this function
   GetTodos:
@@ -80,8 +98,29 @@ functions:
           path: todos
           cors: true
           authorizer: Auth #####
-
-  # TODO: Configure this function
+    iamRoleStatements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+           # - dynamodb:Query
+          Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+          Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
+        - Effect: Allow
+          Action:
+           # - s3:PutObject
+            - s3:GetObject
+          Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
+        - Effect: Allow
+          Action:
+            - "xray:PutTraceSegments"
+            - "xray:PutTelemetryRecords"
+          Resource: "*"
+          
+  
+    # TODO: Configure this function
   #GetTodos:
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
@@ -97,7 +136,16 @@ functions:
             description: Create a new todo
             requestModels:
               'application/json': TodoRequest
-
+    iamRoleStatements: 
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+          Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
+        - Effect: Allow
+          Action:
+            - "xray:PutTraceSegments"
+            - "xray:PutTelemetryRecords"
+          Resource: "*"
   # # TODO: Configure this function
   UpdateTodo:
     handler: src/lambda/http/updateTodo.handler
@@ -113,7 +161,18 @@ functions:
             description: Update a new todo
             requestModels:
               'application/json': UpdateRequest
-              
+    iamRoleStatements: 
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:UpdateItem
+          Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
+        - Effect: Allow
+          Action:
+            - "xray:PutTraceSegments"
+            - "xray:PutTelemetryRecords"
+          Resource: "*"
+          
   # TODO: Configure this function
   DeleteTodo:
     handler: src/lambda/http/deleteTodo.handler
@@ -123,7 +182,18 @@ functions:
           path: todos/{todoId}
           cors: true
           authorization: Auth
-
+    iamRoleStatements: 
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:DeleteItem
+          Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
+        - Effect: Allow
+          Action:
+            - "xray:PutTraceSegments"
+            - "xray:PutTelemetryRecords"
+          Resource: "*"
+          
   # TODO: Configure this function
   GenerateUploadUrl:
     handler: src/lambda/http/generateUploadUrl.handler
@@ -133,13 +203,24 @@ functions:
           path: todos/{todoId}/attachment
           cors: true
           authorization: Auth
-    # iamRoleStatements:     ##############**********
-    #     - Effect: Allow
-    #       Action:
-    #         - s3:PutObject
-    #         - s3:GetObject
-    #       Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
-        
+    iamRoleStatements:     ##############**********
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+           # - s3:GetObject
+          Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:UpdateItem
+          Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
+        - Effect: Allow
+          Action:
+            - "xray:PutTraceSegments"
+            - "xray:PutTelemetryRecords"
+          Resource: "*"
+
+          
 resources:
   Resources:
     # TODO: Add any necessary AWS resources

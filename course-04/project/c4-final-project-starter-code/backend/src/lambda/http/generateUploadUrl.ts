@@ -6,7 +6,7 @@ import * as middy from 'middy'
 import { cors } from 'middy/middlewares'
 import * as uuid from 'uuid'
 import {getUserId} from '../utils'
-import {createImageUrl, saveImageUrl } from '../../businessLogic/todos'
+import {createImageUrl, saveImageUrl,todoExists } from '../../businessLogic/todos'
 import { createLogger } from '../../utils/logger'
 
 //const docClient = new AWS.DynamoDB.DocumentClient()
@@ -28,8 +28,8 @@ export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGat
   //get userid 
   const userId=getUserId(event)
   logger.info(' getUserId ', userId)
-/*
-  const vallidTodo = await todoExists(todoIdparam, userid) 
+
+  const vallidTodo = await todoExists(userId,todoId) 
   if (!vallidTodo){
     return {
       statusCode: 404,
@@ -37,7 +37,7 @@ export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGat
         error: 'todo item does not exist'
       })
     }
-  }*/
+  }
 
   
 
