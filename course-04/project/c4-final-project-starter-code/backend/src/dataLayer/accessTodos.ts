@@ -2,7 +2,6 @@ import * as AWS  from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { TodoItem } from '../models/TodoItem'
-//import { updateTodo } from '../businessLogic/todos'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import { createLogger } from '../utils/logger'
 
@@ -17,7 +16,7 @@ export class accessTodos {
     private readonly docClient: DocumentClient = createDynamoDBClient(),
     private readonly UsersTable = process.env.USERS_TABLE,
     private readonly bucketName = process.env.IMAGES_S3_BUCKET,
-    private readonly ToDoTable = process.env.TODO_TABLE) { //*
+    private readonly ToDoTable = process.env.TODO_TABLE) { 
   }
 
   async getAllTodos(userId: string): Promise<TodoItem[]> {
@@ -47,14 +46,11 @@ export class accessTodos {
     return todo
   }
 
-
-  // implement todoExists/update/delete/createImageUrl 
-
   async updateTodo(updateTodoRequest: UpdateTodoRequest, userId: string, todoIdP: string){
     logger.info('Updating todos item for the current user')
 
     await this.docClient.update({
-      TableName: this.ToDoTable,  //****** 
+      TableName: this.ToDoTable,  
       Key: {
         todoId: todoIdP,
         userId: userId
@@ -80,7 +76,7 @@ export class accessTodos {
     logger.info('Deleting todos item for the current user')
 
     await this.docClient.delete({
-      TableName: this.ToDoTable,  //****** 
+      TableName: this.ToDoTable, 
       Key: {
         todoId: todoId,
         userId: userId
@@ -105,12 +101,12 @@ export class accessTodos {
   async saveImageUrl(userId:string, todoId: string, newImage: string){
   logger.info('Updating attachments url ')
   await this.docClient.update({
-    TableName: this.ToDoTable,  //****** 
+    TableName: this.ToDoTable, 
     Key: {
       todoId: todoId,
       userId: userId
     },
-    UpdateExpression: 'set #attachmentUrl = :attachmentUrl', /*** */
+    UpdateExpression: 'set #attachmentUrl = :attachmentUrl', 
     ExpressionAttributeValues: {
         ':attachmentUrl': newImage    
     },
@@ -149,8 +145,6 @@ export class accessTodos {
   }
  
 }
-
-
 
 
 function createDynamoDBClient() {

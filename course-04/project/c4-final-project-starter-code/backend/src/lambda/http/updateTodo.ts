@@ -3,6 +3,10 @@ import {getUserId} from '../utils'
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
 import {updateTodo, todoExists} from '../../businessLogic/todos'
 import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
+import { createLogger } from '../../utils/logger'
+
+const logger = createLogger('auth')
+
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const todoId = event.pathParameters.todoId
@@ -10,11 +14,10 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
   // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
 
-  console.log('UpdateTodo ',todoId)
+  logger.info('UpdateTodo ',todoId)
   const userId = getUserId(event)
-  console.log('getUserId(event)', userId)
+  logger.info('getUserId(event)', userId)
 
-  //impelement exists
   const todovalid=await todoExists(userId, todoId)
   if(!todovalid){
     return {
@@ -29,7 +32,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     
   }
   const result=await updateTodo(updatedTodo,userId, todoId)
-  console.log(result)
+  logger.info(result)
   
   return {
     statusCode: 204,

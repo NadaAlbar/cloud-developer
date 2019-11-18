@@ -7,10 +7,6 @@ import { JwtPayload } from '../../auth/JwtPayload'
 import { Jwt } from '../../auth/Jwt'
 import {parseUserId} from '../../auth/utils'
 import * as AWS from 'aws-sdk'
-/*
-import Axios from 'axios'*/
-
-//import { getUserId } from '../utils'
 
 
 const logger = createLogger('auth')
@@ -20,7 +16,6 @@ const logger = createLogger('auth')
 // To get this URL you need to go to an Auth0 page -> Show Advanced Settings -> Endpoints -> JSON Web Key Set
 
 
-//const jwksUrl = '...'
 const cert= `-----BEGIN CERTIFICATE-----
 MIIDBzCCAe+gAwIBAgIJX3tP78GOUhzQMA0GCSqGSIb3DQEBCwUAMCExHzAdBgNV
 BAMTFmRldi1xMDhnNTlxNy5hdXRoMC5jb20wHhcNMTkxMTA1MTMwNzMxWhcNMzMw

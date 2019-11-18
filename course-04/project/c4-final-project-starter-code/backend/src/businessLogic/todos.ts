@@ -4,19 +4,19 @@ import { TodoItem } from '../models/TodoItem'
 import { accessTodos } from '../dataLayer/accessTodos'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
-//import { parseUserId } from '../auth/utils'
+
 
 const todoAccess = new accessTodos ()
 
 
 export async function getAllTodos(userId:string): Promise<TodoItem[]> {
     return todoAccess.getAllTodos(userId)
-  }//
+  }
   
   export async function createTodo(CreateTodoRequest: CreateTodoRequest,userId: string): Promise<TodoItem> {
   
     const todoId = uuid.v4()
-    //const userId = parseUserId(jwtToken)
+   
   
     const todoItem = {
       todoId: todoId,
