@@ -1,11 +1,12 @@
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import 'source-map-support/register'
-import * as AWS  from 'aws-sdk'
+//import * as AWS  from 'aws-sdk'
 import { getUserId } from '../utils'
+import {userExists, getAllTodos} from '../../businessLogic/todos'
 
-const docClient = new AWS.DynamoDB.DocumentClient()
+//const docClient = new AWS.DynamoDB.DocumentClient()
 //const usersTable = process.env.USERS_TABLE
-const ToDoTable = process.env.TODO_TABLE
+//const ToDoTable = process.env.TODO_TABLE
 //const todoIdIndex = process.env.TODO_ID_INDEX
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -14,7 +15,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   console.log('Processing event: ', event)
   const userId = getUserId(event)
   console.log(' user Id: ', userId )
-  /*
+  
   const validUserId= await userExists(userId)
   if (!validUserId){
   return {
@@ -27,9 +28,8 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     })
   }
   }
-*/
 
-  const todos = await getTodosforUserId(userId)
+  const todos = await getAllTodos(userId)
 
   return {
     statusCode: 200,
@@ -54,7 +54,7 @@ async function userExists(userId: string){
   return !!result.Item
 }
 */
-
+/*
 async function getTodosforUserId(userId: string){
   const result = await docClient.query({
     TableName: ToDoTable,
@@ -67,4 +67,4 @@ async function getTodosforUserId(userId: string){
   }).promise()
 
   return result.Items
-}
+}*/

@@ -1,15 +1,15 @@
 import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
-import * as uuid from 'uuid'
 import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
-import * as AWS  from 'aws-sdk'
+//import * as AWS  from 'aws-sdk'
 import { getUserId } from '../utils'
+import { createTodo } from '../../businessLogic/todos'
 //import {parseUserId} from '../../auth/utils'
 
 
 
-const docClient = new AWS.DynamoDB.DocumentClient()
-const ToDoTable = process.env.TODO_TABLE
+//const docClient = new AWS.DynamoDB.DocumentClient()
+//const ToDoTable = process.env.TODO_TABLE
 
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -18,7 +18,11 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   // TODO: Implement creating a new TODO item
 
   console.log('Processing event: ', event)
-  console.log('UserId', getUserId(event))
+  const userId= getUserId(event)
+  console.log('Creating todo item for user: ',userId )
+
+   const item= await createTodo(newTodo,userId)
+  /*
   const itemId = uuid.v4()
   const timestamp = new Date().toISOString()
   
@@ -35,7 +39,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     TableName: ToDoTable,
     Item: newItem
   }).promise()
-  
+  */
   return {
     statusCode: 201,
     headers: {
@@ -43,7 +47,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
       'Access-Control-Allow-Credentials': true
     },
     body: JSON.stringify({
-    newItem
+      item
     })
   }
 }
